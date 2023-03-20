@@ -1,7 +1,7 @@
 package scanner
 
 import (
-	"fly/token"
+	"github.com/flychario/flylang/token"
 	"unicode/utf8"
 )
 
