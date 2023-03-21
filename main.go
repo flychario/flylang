@@ -1,8 +1,10 @@
 package main
 
 import (
-	"fly/scanner"
-	"fly/token"
+	"fmt"
+	//"github.com/flychario/flylang/scanner"
+	//"github.com/flychario/flylang/token"
+	"github.com/flychario/flylang/parser"
 	"io"
 	"os"
 )
@@ -24,13 +26,18 @@ func main() {
 		panic(err)
 	}
 
-	var s scanner.Scanner
-	s.Init(content)
-	for {
-		tok, lit := s.Scan()
-		if tok == token.EOF {
-			break
-		}
-		println(tok.String(), lit)
-	}
+	//var s scanner.Scanner
+	//s.Init(content)
+	//for {
+	//	tok, lit := s.Scan()
+	//	if tok == token.EOF {
+	//		break
+	//	}
+	//	println(tok.String(), lit)
+	//}
+
+	var p parser.Parser
+	p.Init(fileName, content)
+	res := p.ParseProgram()
+	fmt.Printf("%#v", res)
 }
