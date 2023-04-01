@@ -28,6 +28,7 @@ const (
 	LiteralTypeInteger
 	LiteralTypeReal
 	LiteralTypeBoolean
+	LiteralTypeNull
 )
 
 type Atom struct {

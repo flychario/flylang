@@ -42,6 +42,7 @@ const (
 	INTEGER
 	REAL
 	BOOLEAN
+	NULL
 
 	LPAREN
 	RPAREN
@@ -104,12 +105,19 @@ func isBoolean(ident string) bool {
 	return ident == "true" || ident == "false"
 }
 
+func isNull(ident string) bool {
+	return ident == "null"
+}
+
 func Lookup(ident string) Token {
 	if tok, isKeyword := keywords[ident]; isKeyword {
 		return tok
 	}
 	if isBoolean(ident) {
 		return BOOLEAN
+	}
+	if isNull(ident) {
+		return NULL
 	}
 	return IDENTIFIER
 }

@@ -19,3 +19,18 @@ func TestBoolean(t *testing.T) {
 		t.Log(res)
 	}
 }
+
+func TestNull(t *testing.T) {
+	for _, test := range []struct {
+		input string
+		//ast   ast.Program
+	}{
+		{"(null true)"},
+	} {
+		var p Parser
+		p.Init("test", []byte(test.input))
+		res := p.ParseProgram()
+		fmt.Printf("%#v\n", res)
+		t.Log(res)
+	}
+}
