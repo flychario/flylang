@@ -41,6 +41,7 @@ const (
 	IDENTIFIER
 	INTEGER
 	REAL
+	BOOLEAN
 
 	LPAREN
 	RPAREN
@@ -65,6 +66,7 @@ var tokens = [...]string{
 	IDENTIFIER: "IDENTIFIER",
 	INTEGER:    "INTEGER",
 	REAL:       "REAL",
+	BOOLEAN:    "BOOLEAN",
 
 	LPAREN: "(",
 	RPAREN: ")",
@@ -98,9 +100,16 @@ func (tok Token) String() string {
 	return tokens[tok]
 }
 
+func isBoolean(ident string) bool {
+	return ident == "true" || ident == "false"
+}
+
 func Lookup(ident string) Token {
 	if tok, isKeyword := keywords[ident]; isKeyword {
 		return tok
+	}
+	if isBoolean(ident) {
+		return BOOLEAN
 	}
 	return IDENTIFIER
 }

@@ -88,6 +88,7 @@ func (s *Scanner) Scan() (tok token.Token, lit string) {
 	if isLetter(s.ch) {
 		lit = s.scanIdentifier()
 		tok = token.Lookup(lit)
+
 		return
 	}
 

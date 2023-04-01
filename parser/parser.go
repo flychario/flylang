@@ -78,6 +78,10 @@ func (p *Parser) parseLiteral() (ret ast.Literal) {
 		ret = ast.Literal{Value: p.lit, Type: ast.LiteralTypeReal}
 		p.expect(token.REAL)
 		return ret
+	} else if p.tok == token.BOOLEAN {
+		ret = ast.Literal{Value: p.lit, Type: ast.LiteralTypeBoolean}
+		p.expect(token.BOOLEAN)
+		return ret
 	}
 	panic("expected literal")
 }
@@ -138,7 +142,7 @@ func (p *Parser) parseElement() ast.Element {
 	switch p.tok {
 	case token.IDENTIFIER:
 		return p.parseAtom()
-	case token.INTEGER, token.REAL:
+	case token.INTEGER, token.REAL, token.BOOLEAN:
 		return p.parseLiteral()
 	case token.LPAREN:
 		return p.parseList()
