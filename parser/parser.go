@@ -65,8 +65,15 @@ func (p *Parser) parseList() ast.List {
 	for p.tok != token.RPAREN {
 		elements = append(elements, p.parseElement())
 	}
+
+	if len(elements) == 1 {
+		if ast.IsKeyword(elements[0].ElementType()) {
+			return elements[0]
+		}
+	}
+
 	p.expect(token.RPAREN)
-	return ast.List{Elements: elements}
+	return ast.ListElement{Elements: elements}
 }
 
 func (p *Parser) parseLiteral() (ret ast.Literal) {
