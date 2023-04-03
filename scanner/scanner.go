@@ -9,17 +9,24 @@ type Scanner struct {
 	src    []byte // source
 	ch     rune   // current character
 	offset int    // current offset
+	prev   rune   // previous character
+
+	lineOffset int // offset of current line
+	line       int // current line
 }
 
 func (s *Scanner) Init(src []byte) {
 	s.src = src
 	s.ch = ' '
 	s.offset = 0
+	s.lineOffset = 0
+	s.line = 1
 	s.next()
 }
 
 func (s *Scanner) next() {
 	if s.offset >= len(s.src) {
+		s.prev = s.ch
 		s.ch = -1 // eof
 	} else {
 		r, w := rune(s.src[s.offset]), 1
@@ -33,6 +40,13 @@ func (s *Scanner) next() {
 			}
 		}
 		s.offset += w
+		s.lineOffset += 1
+		if r == '\n' {
+			s.line++
+			s.lineOffset = 0
+		}
+
+		s.prev = s.ch
 		s.ch = r
 	}
 }
@@ -75,13 +89,24 @@ func (s *Scanner) scanNumber() (token.Token, string) {
 		s.next()
 	}
 
+	if isLetter(s.ch) || s.prev == '.' {
+		tok = token.ILLEGAL
+	}
+
 	return tok, string(buf[0:i])
 }
 
-func (s *Scanner) Scan() (tok token.Token, lit string) {
+func (s *Scanner) Scan() (pos token.Position, tok token.Token, lit string) {
 	// skip white space
 	for s.ch == ' ' || s.ch == '\t' || s.ch == '\n' || s.ch == '\r' {
 		s.next()
+	}
+
+	// current position
+	pos = token.Position{
+		Offset: s.offset,
+		Line:   s.line,
+		Column: s.lineOffset,
 	}
 
 	// identifier or keyword

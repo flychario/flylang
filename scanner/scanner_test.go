@@ -18,12 +18,15 @@ func TestNumbers(t *testing.T) {
 		{"1.0", token.REAL, "1.0"},
 		{"1.1", token.REAL, "1.1"},
 		{"1.1.1", token.ILLEGAL, "1.1.1"},
+		{"1.", token.ILLEGAL, "1."},
+		{".1", token.ILLEGAL, ""},
+		{"1abc", token.ILLEGAL, "1"},
 	} {
 		var s Scanner
 		s.Init([]byte(test.input))
-		tok, lit := s.Scan()
+		_, tok, lit := s.Scan()
 		if tok != test.tok {
-			t.Errorf("expected token %s, got %s", test.tok, tok)
+			t.Errorf("expected token %s, got %s. input: %s", test.tok, tok, test.input)
 		}
 		if lit != test.lit {
 			t.Errorf("expected literal %s, got %s", test.lit, lit)
@@ -53,7 +56,7 @@ func TestIdentifiers(t *testing.T) {
 	} {
 		var s Scanner
 		s.Init([]byte(test.input))
-		tok, _ := s.Scan()
+		_, tok, _ := s.Scan()
 		if tok != test.tok {
 			t.Errorf("expected token %s, got %s", test.tok, tok)
 		}
@@ -111,7 +114,7 @@ func TestProgram(t *testing.T) {
 		{token.INTEGER, "0"},
 		{token.RPAREN, ""},
 		{token.INTEGER, "2"},
-		{token.IDENTIFIER, "true"},
+		{token.BOOLEAN, "true"},
 		{token.RPAREN, ""},
 		{token.RPAREN, ""},
 
@@ -123,7 +126,7 @@ func TestProgram(t *testing.T) {
 	var s Scanner
 	s.Init(src)
 	for _, w := range want {
-		tok, lit := s.Scan()
+		_, tok, lit := s.Scan()
 		if tok != w.tok {
 			t.Errorf("expected token %s, got %s", w.tok, tok)
 		}

@@ -64,22 +64,22 @@ type Setq struct {
 
 type Func struct {
 	Atom    Atom
-	List    ListElement
+	List    List
 	Element Element
 }
 
 type Lambda struct {
-	List    ListElement
+	List    List
 	Element Element
 }
 
 type Prog struct {
-	List    ListElement
+	List    List
 	Element Element
 }
 
 type Cond struct {
-	List     ListElement
+	List     List
 	Element1 Element
 	Element2 Element
 }

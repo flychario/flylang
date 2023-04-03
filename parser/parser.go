@@ -23,9 +23,9 @@ type Parser struct {
 	//lineComment *ast.CommentGroup // last line comment
 
 	// Next token
-	//pos token.Pos   // token position
-	tok token.Token // one token look-ahead
-	lit string      // token literal
+	pos token.Position // token position
+	tok token.Token    // one token look-ahead
+	lit string         // token literal
 }
 
 func (p *Parser) Init(filename string, src []byte) {
@@ -47,7 +47,7 @@ func (p *Parser) next() {
 	//p.leadComment = nil
 	//p.lineComment = nil
 	//prev := p.pos
-	p.tok, p.lit = p.scanner.Scan()
+	p.pos, p.tok, p.lit = p.scanner.Scan()
 }
 
 func (p *Parser) expect(tok token.Token) {
@@ -62,17 +62,31 @@ func (p *Parser) expect(tok token.Token) {
 func (p *Parser) parseList() ast.List {
 	var elements []ast.Element
 	p.expect(token.LPAREN)
+	defer p.expect(token.RPAREN)
+
+	switch p.tok {
+	case token.SETQ:
+		return p.parseSetq()
+	case token.FUNC:
+		return p.parseFunc()
+	case token.LAMBDA:
+		return p.parseLambda()
+	case token.PROG:
+		return p.parseProg()
+	case token.COND:
+		return p.parseCond()
+	case token.WHILE:
+		return p.parseWhile()
+	case token.RETURN:
+		return p.parseReturn()
+	case token.BREAK:
+		return p.parseBreak()
+	}
+
 	for p.tok != token.RPAREN {
 		elements = append(elements, p.parseElement())
 	}
 
-	if len(elements) == 1 {
-		if ast.IsKeyword(elements[0].ElementType()) {
-			return elements[0]
-		}
-	}
-
-	p.expect(token.RPAREN)
 	return ast.ListElement{Elements: elements}
 }
 
@@ -157,22 +171,6 @@ func (p *Parser) parseElement() ast.Element {
 		return p.parseLiteral()
 	case token.LPAREN:
 		return p.parseList()
-	case token.SETQ:
-		return p.parseSetq()
-	case token.FUNC:
-		return p.parseFunc()
-	case token.LAMBDA:
-		return p.parseLambda()
-	case token.PROG:
-		return p.parseProg()
-	case token.COND:
-		return p.parseCond()
-	case token.WHILE:
-		return p.parseWhile()
-	case token.RETURN:
-		return p.parseReturn()
-	case token.BREAK:
-		return p.parseBreak()
 	}
 	panic("expected element")
 }
