@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"github.com/flychario/flylang/ast"
+
 	//"github.com/flychario/flylang/scanner"
 	//"github.com/flychario/flylang/token"
 	"github.com/flychario/flylang/parser"
@@ -38,6 +40,10 @@ func main() {
 
 	var p parser.Parser
 	p.Init(fileName, content)
-	res := p.ParseProgram()
-	fmt.Printf("%#v", res)
+	program := p.ParseProgram()
+	//fmt.Printf("%#v\n\n", program)
+
+	c := ast.GetGlobalContext()
+	execRes := program.Eval(c)
+	fmt.Printf("\n%v", execRes[len(execRes)-1])
 }

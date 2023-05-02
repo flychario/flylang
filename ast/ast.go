@@ -2,11 +2,16 @@ package ast
 
 type Element interface {
 	ElementType() ElementType
+	Eval(*Context) Element
 }
 
 type List interface {
 	Element
 	GetElements() []Element
+}
+
+type Callable interface {
+	Call(*Context, []Element) Element
 }
 
 type ElementType int
@@ -16,6 +21,7 @@ const (
 	ElementTypeAtom
 	ElementTypeLiteral
 	ElementTypeList
+	ElementTypeProgram
 
 	keywords
 	ElementTypeSetq
@@ -43,19 +49,48 @@ type Atom struct {
 	Name string
 }
 
-type Literal struct {
-	Value string
-	Type  LiteralType
+type Literal interface {
+	Element
+	Type() LiteralType
+}
+
+type LiteralInteger struct {
+	Value int64
+}
+
+type LiteralReal struct {
+	Value float64
+}
+
+type LiteralBoolean struct {
+	Value bool
+}
+
+type LiteralNull struct {
+	Value interface{}
 }
 
 type ListElement struct {
 	Elements []Element
 }
 
-func (a Atom) ElementType() ElementType        { return ElementTypeAtom }
-func (l Literal) ElementType() ElementType     { return ElementTypeLiteral }
-func (l ListElement) ElementType() ElementType { return ElementTypeList }
-func (l ListElement) GetElements() []Element   { return l.Elements }
+type Program struct {
+	Elements []Element
+}
+
+func (a Atom) ElementType() ElementType           { return ElementTypeAtom }
+func (l LiteralInteger) ElementType() ElementType { return ElementTypeLiteral }
+func (l LiteralReal) ElementType() ElementType    { return ElementTypeLiteral }
+func (l LiteralBoolean) ElementType() ElementType { return ElementTypeLiteral }
+func (l LiteralNull) ElementType() ElementType    { return ElementTypeLiteral }
+func (l ListElement) ElementType() ElementType    { return ElementTypeList }
+func (l ListElement) GetElements() []Element      { return l.Elements }
+func (p Program) ElementType() ElementType        { return ElementTypeProgram }
+
+func (l LiteralInteger) Type() LiteralType { return LiteralTypeInteger }
+func (l LiteralReal) Type() LiteralType    { return LiteralTypeReal }
+func (l LiteralBoolean) Type() LiteralType { return LiteralTypeBoolean }
+func (l LiteralNull) Type() LiteralType    { return LiteralTypeNull }
 
 type Setq struct {
 	Atom    Atom
@@ -65,17 +100,17 @@ type Setq struct {
 type Func struct {
 	Atom    Atom
 	List    List
-	Element Element
+	SubProg Program
 }
 
 type Lambda struct {
 	List    List
-	Element Element
+	SubProg Program
 }
 
 type Prog struct {
 	List    List
-	Element Element
+	SubProg Program
 }
 
 type Cond struct {
@@ -106,18 +141,15 @@ func (r Return) ElementType() ElementType { return ElementTypeReturn }
 func (b Break) ElementType() ElementType  { return ElementTypeBreak }
 
 func (s Setq) GetElements() []Element   { return []Element{s.Element} }
-func (f Func) GetElements() []Element   { return []Element{f.List, f.Element} }
-func (l Lambda) GetElements() []Element { return []Element{l.List, l.Element} }
-func (p Prog) GetElements() []Element   { return []Element{p.List, p.Element} }
+func (f Func) GetElements() []Element   { return []Element{f.List} }
+func (l Lambda) GetElements() []Element { return []Element{l.List} }
+func (p Prog) GetElements() []Element   { return []Element{p.List} }
 func (c Cond) GetElements() []Element   { return []Element{c.List, c.Element1, c.Element2} }
 func (w While) GetElements() []Element  { return []Element{w.Element1, w.Element2} }
 func (r Return) GetElements() []Element { return []Element{r.Element} }
 func (b Break) GetElements() []Element  { return []Element{} }
 
-type Program struct {
-	Elements []Element
-}
-
-func IsKeyword(e ElementType) bool {
-	return e >= keywords && e <= endkeywords
-}
+//
+//func IsKeyword(e ElementType) bool {
+//	return e >= keywords && e <= endkeywords
+//}

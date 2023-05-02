@@ -1,5 +1,6 @@
 (func fib (n)
-    (cond (lesseq n 1) 
-        n (plus 
+    (cond (lesseq n 1)
+        n (plus
             (fib (minus n 1)) 
             (fib (minus n 2)))))
+(fib 10)

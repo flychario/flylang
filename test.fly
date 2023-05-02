@@ -1,0 +1,2 @@
+(func fib (a b) (plus a c))
+(fib 2 3)

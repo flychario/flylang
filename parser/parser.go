@@ -4,6 +4,7 @@ import (
 	"github.com/flychario/flylang/ast"
 	"github.com/flychario/flylang/scanner"
 	"github.com/flychario/flylang/token"
+	"strconv"
 )
 
 // The Parser structure holds the Parser's internal state.
@@ -71,16 +72,16 @@ func (p *Parser) parseList() ast.List {
 		return p.parseFunc()
 	case token.LAMBDA:
 		return p.parseLambda()
-	case token.PROG:
-		return p.parseProg()
+		//case token.PROG:
+		//	return p.parseProg()
 	case token.COND:
 		return p.parseCond()
-	case token.WHILE:
-		return p.parseWhile()
-	case token.RETURN:
-		return p.parseReturn()
-	case token.BREAK:
-		return p.parseBreak()
+		//case token.WHILE:
+		//	return p.parseWhile()
+		//case token.RETURN:
+		//	return p.parseReturn()
+		//case token.BREAK:
+		//	return p.parseBreak()
 	}
 
 	for p.tok != token.RPAREN {
@@ -92,19 +93,33 @@ func (p *Parser) parseList() ast.List {
 
 func (p *Parser) parseLiteral() (ret ast.Literal) {
 	if p.tok == token.INTEGER {
-		ret = ast.Literal{Value: p.lit, Type: ast.LiteralTypeInteger}
+		val, err := strconv.ParseInt(p.lit, 10, 64)
+		if err != nil {
+			panic(err)
+		}
+		ret = ast.LiteralInteger{Value: val}
 		p.expect(token.INTEGER)
 		return ret
 	} else if p.tok == token.REAL {
-		ret = ast.Literal{Value: p.lit, Type: ast.LiteralTypeReal}
+		val, err := strconv.ParseFloat(p.lit, 64)
+		if err != nil {
+			panic(err)
+		}
+		ret = ast.LiteralReal{Value: val}
 		p.expect(token.REAL)
 		return ret
 	} else if p.tok == token.BOOLEAN {
-		ret = ast.Literal{Value: p.lit, Type: ast.LiteralTypeBoolean}
+		if p.lit == "true" {
+			ret = ast.LiteralBoolean{Value: true}
+		} else if p.lit == "false" {
+			ret = ast.LiteralBoolean{Value: false}
+		} else {
+			panic("invalid boolean literal")
+		}
 		p.expect(token.BOOLEAN)
 		return ret
 	} else if p.tok == token.NULL {
-		ret = ast.Literal{Value: p.lit, Type: ast.LiteralTypeNull}
+		ret = ast.LiteralNull{}
 		p.expect(token.NULL)
 		return ret
 	}
@@ -124,17 +139,17 @@ func (p *Parser) parseSetq() ast.Setq {
 
 func (p *Parser) parseFunc() ast.Func {
 	p.expect(token.FUNC)
-	return ast.Func{Atom: p.parseAtom(), List: p.parseList(), Element: p.parseElement()}
+	return ast.Func{Atom: p.parseAtom(), List: p.parseList(), SubProg: p.ParseSubProgram()}
 }
 
 func (p *Parser) parseLambda() ast.Lambda {
 	p.expect(token.LAMBDA)
-	return ast.Lambda{List: p.parseList(), Element: p.parseElement()}
+	return ast.Lambda{List: p.parseList(), SubProg: p.ParseSubProgram()}
 }
 
 func (p *Parser) parseProg() ast.Prog {
 	p.expect(token.PROG)
-	return ast.Prog{List: p.parseList(), Element: p.parseElement()}
+	return ast.Prog{List: p.parseList(), SubProg: p.ParseSubProgram()}
 }
 
 func (p *Parser) parseCond() ast.Cond {
@@ -173,6 +188,14 @@ func (p *Parser) parseElement() ast.Element {
 		return p.parseList()
 	}
 	panic("expected element")
+}
+
+func (p *Parser) ParseSubProgram() ast.Program {
+	var elements []ast.Element
+	for p.tok != token.RPAREN {
+		elements = append(elements, p.parseElement())
+	}
+	return ast.Program{Elements: elements}
 }
 
 func (p *Parser) ParseProgram() ast.Program {
