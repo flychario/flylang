@@ -133,7 +133,7 @@ var Builtins = []Builtin{
 			ae := args[0].Eval(c)
 			be := args[1].Eval(c)
 			if ae.ElementType() != ElementTypeLiteral || be.ElementType() != ElementTypeLiteral {
-				panic(fmt.Sprintf("Can't add %s and %s", ae, be))
+				panic(fmt.Sprintf("Can't compare %s and %s", ae, be))
 			}
 			a := ae.(Literal)
 			b := be.(Literal)
@@ -149,6 +149,56 @@ var Builtins = []Builtin{
 				return LiteralBoolean{a.(LiteralBoolean).Value == b.(LiteralBoolean).Value}
 			} else if a.Type() == LiteralTypeNull && b.Type() == LiteralTypeNull {
 				return LiteralBoolean{true}
+			}
+			panic(fmt.Sprintf("Can't compare %s and %s", a, b))
+		},
+	},
+	{
+		Name: "nonequal",
+		Args: []Element{Atom{"a"}, Atom{"b"}},
+		Code: func(c *Context, args []Element) Element {
+			ae := args[0].Eval(c)
+			be := args[1].Eval(c)
+			if ae.ElementType() != ElementTypeLiteral || be.ElementType() != ElementTypeLiteral {
+				panic(fmt.Sprintf("Can't compare %s and %s", ae, be))
+			}
+			a := ae.(Literal)
+			b := be.(Literal)
+			if a.Type() == LiteralTypeInteger && b.Type() == LiteralTypeInteger {
+				return LiteralBoolean{a.(LiteralInteger).Value != b.(LiteralInteger).Value}
+			} else if a.Type() == LiteralTypeReal && b.Type() == LiteralTypeReal {
+				return LiteralBoolean{a.(LiteralReal).Value != b.(LiteralReal).Value}
+			} else if a.Type() == LiteralTypeInteger && b.Type() == LiteralTypeReal {
+				return LiteralBoolean{float64(a.(LiteralInteger).Value) != b.(LiteralReal).Value}
+			} else if a.Type() == LiteralTypeReal && b.Type() != LiteralTypeInteger {
+				return LiteralBoolean{a.(LiteralReal).Value == float64(b.(LiteralInteger).Value)}
+			} else if a.Type() == LiteralTypeBoolean && b.Type() != LiteralTypeBoolean {
+				return LiteralBoolean{a.(LiteralBoolean).Value == b.(LiteralBoolean).Value}
+			} else if a.Type() == LiteralTypeNull && b.Type() != LiteralTypeNull {
+				return LiteralBoolean{true}
+			}
+			panic(fmt.Sprintf("Can't compare %s and %s", a, b))
+		},
+	},
+	{
+		Name: "less",
+		Args: []Element{Atom{"a"}, Atom{"b"}},
+		Code: func(c *Context, args []Element) Element {
+			ae := args[0].Eval(c)
+			be := args[1].Eval(c)
+			if ae.ElementType() != ElementTypeLiteral || be.ElementType() != ElementTypeLiteral {
+				panic(fmt.Sprintf("Can't compare %s and %s", ae, be))
+			}
+			a := ae.(Literal)
+			b := be.(Literal)
+			if a.Type() == LiteralTypeInteger && b.Type() == LiteralTypeInteger {
+				return LiteralBoolean{a.(LiteralInteger).Value < b.(LiteralInteger).Value}
+			} else if a.Type() == LiteralTypeReal && b.Type() == LiteralTypeReal {
+				return LiteralBoolean{a.(LiteralReal).Value < b.(LiteralReal).Value}
+			} else if a.Type() == LiteralTypeInteger && b.Type() == LiteralTypeReal {
+				return LiteralBoolean{float64(a.(LiteralInteger).Value) < b.(LiteralReal).Value}
+			} else if a.Type() == LiteralTypeReal && b.Type() == LiteralTypeInteger {
+				return LiteralBoolean{a.(LiteralReal).Value < float64(b.(LiteralInteger).Value)}
 			}
 			panic(fmt.Sprintf("Can't compare %s and %s", a, b))
 		},
@@ -174,6 +224,148 @@ var Builtins = []Builtin{
 				return LiteralBoolean{a.(LiteralReal).Value <= float64(b.(LiteralInteger).Value)}
 			}
 			panic(fmt.Sprintf("Can't compare %s and %s", a, b))
+		},
+	},
+	{
+		Name: "greater",
+		Args: []Element{Atom{"a"}, Atom{"b"}},
+		Code: func(c *Context, args []Element) Element {
+			ae := args[0].Eval(c)
+			be := args[1].Eval(c)
+			if ae.ElementType() != ElementTypeLiteral || be.ElementType() != ElementTypeLiteral {
+				panic(fmt.Sprintf("Can't compare %s and %s", ae, be))
+			}
+			a := ae.(Literal)
+			b := be.(Literal)
+			if a.Type() == LiteralTypeInteger && b.Type() == LiteralTypeInteger {
+				return LiteralBoolean{a.(LiteralInteger).Value > b.(LiteralInteger).Value}
+			} else if a.Type() == LiteralTypeReal && b.Type() == LiteralTypeReal {
+				return LiteralBoolean{a.(LiteralReal).Value > b.(LiteralReal).Value}
+			} else if a.Type() == LiteralTypeInteger && b.Type() == LiteralTypeReal {
+				return LiteralBoolean{float64(a.(LiteralInteger).Value) > b.(LiteralReal).Value}
+			} else if a.Type() == LiteralTypeReal && b.Type() == LiteralTypeInteger {
+				return LiteralBoolean{a.(LiteralReal).Value > float64(b.(LiteralInteger).Value)}
+			}
+			panic(fmt.Sprintf("Can't compare %s and %s", a, b))
+		},
+	},
+	{
+		Name: "greatereq",
+		Args: []Element{Atom{"a"}, Atom{"b"}},
+		Code: func(c *Context, args []Element) Element {
+			ae := args[0].Eval(c)
+			be := args[1].Eval(c)
+			if ae.ElementType() != ElementTypeLiteral || be.ElementType() != ElementTypeLiteral {
+				panic(fmt.Sprintf("Can't compare %s and %s", ae, be))
+			}
+			a := ae.(Literal)
+			b := be.(Literal)
+			if a.Type() == LiteralTypeInteger && b.Type() == LiteralTypeInteger {
+				return LiteralBoolean{a.(LiteralInteger).Value >= b.(LiteralInteger).Value}
+			} else if a.Type() == LiteralTypeReal && b.Type() == LiteralTypeReal {
+				return LiteralBoolean{a.(LiteralReal).Value >= b.(LiteralReal).Value}
+			} else if a.Type() == LiteralTypeInteger && b.Type() == LiteralTypeReal {
+				return LiteralBoolean{float64(a.(LiteralInteger).Value) >= b.(LiteralReal).Value}
+			} else if a.Type() == LiteralTypeReal && b.Type() == LiteralTypeInteger {
+				return LiteralBoolean{a.(LiteralReal).Value >= float64(b.(LiteralInteger).Value)}
+			}
+			panic(fmt.Sprintf("Can't compare %s and %s", a, b))
+		},
+	},
+	{
+		Name: "isint",
+		Args: []Element{Atom{"a"}},
+		Code: func(c *Context, args []Element) Element {
+			ae := args[0].Eval(c)
+
+			var isElementType = ae.ElementType() == ElementTypeLiteral
+			var isValidLiteralType = false
+
+			if isElementType {
+				isValidLiteralType = ae.(Literal).Type() == LiteralTypeInteger
+			}
+
+			return LiteralBoolean{isValidLiteralType}
+		},
+	},
+	{
+		Name: "isreal",
+		Args: []Element{Atom{"a"}},
+		Code: func(c *Context, args []Element) Element {
+			ae := args[0].Eval(c)
+
+			var isElementType = ae.ElementType() == ElementTypeLiteral
+			var isValidLiteralType = false
+
+			if isElementType {
+				isValidLiteralType = ae.(Literal).Type() == LiteralTypeReal
+			}
+
+			return LiteralBoolean{isValidLiteralType}
+		},
+	},
+	{
+		Name: "isbool",
+		Args: []Element{Atom{"a"}},
+		Code: func(c *Context, args []Element) Element {
+			ae := args[0].Eval(c)
+
+			var isElementType = ae.ElementType() == ElementTypeLiteral
+			var isValidLiteralType = false
+
+			if isElementType {
+				isValidLiteralType = ae.(Literal).Type() == LiteralTypeBoolean
+			}
+
+			return LiteralBoolean{isValidLiteralType}
+		},
+	},
+	{
+		Name: "isnull",
+		Args: []Element{Atom{"a"}},
+		Code: func(c *Context, args []Element) Element {
+			ae := args[0].Eval(c)
+
+			var isElementType = ae.ElementType() == ElementTypeLiteral
+			var isValidLiteralType = false
+
+			if isElementType {
+				isValidLiteralType = ae.(Literal).Type() == LiteralTypeNull
+			}
+
+			return LiteralBoolean{isValidLiteralType}
+		},
+	},
+	{
+		Name: "isatom",
+		Args: []Element{Atom{"a"}},
+		Code: func(c *Context, args []Element) Element {
+			ae := args[0].Eval(c)
+
+			var isElementType = ae.ElementType() == ElementTypeAtom
+			var isValidLiteralType = false
+
+			if isElementType {
+				isValidLiteralType = ae.(Literal).Type() == LiteralTypeNull
+			}
+
+			return LiteralBoolean{isValidLiteralType}
+		},
+	},
+	{
+		Name: "islist",
+		Args: []Element{Atom{"a"}},
+		Code: func(c *Context, args []Element) Element {
+			ae := args[0].Eval(c)
+
+			var isElementType = ae.ElementType() == ElementTypeLiteral
+			var isValidLiteralType = false
+
+			if isElementType {
+				isValidLiteralType = ae.(Literal).Type() == LiteralTypeList
+			}
+
+			return LiteralBoolean{isValidLiteralType}
 		},
 	},
 }

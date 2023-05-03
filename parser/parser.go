@@ -72,10 +72,12 @@ func (p *Parser) parseList() ast.List {
 		return p.parseFunc()
 	case token.LAMBDA:
 		return p.parseLambda()
-		//case token.PROG:
-		//	return p.parseProg()
+	case token.PROG:
+		return p.parseProg()
 	case token.COND:
 		return p.parseCond()
+	case token.QUOTE:
+		return p.parseQuote()
 		//case token.WHILE:
 		//	return p.parseWhile()
 		//case token.RETURN:
@@ -132,6 +134,16 @@ func (p *Parser) parseAtom() ast.Atom {
 	return ret
 }
 
+func (p *Parser) parseShortQuote() ast.Quote {
+	p.expect(token.SHORT_QUOTE)
+	return ast.Quote{Element: p.parseElement()}
+}
+
+func (p *Parser) parseQuote() ast.Quote {
+	p.expect(token.QUOTE)
+	return ast.Quote{Element: p.parseElement()}
+}
+
 func (p *Parser) parseSetq() ast.Setq {
 	p.expect(token.SETQ)
 	return ast.Setq{Atom: p.parseAtom(), Element: p.parseElement()}
@@ -184,6 +196,8 @@ func (p *Parser) parseElement() ast.Element {
 		return p.parseAtom()
 	case token.INTEGER, token.REAL, token.BOOLEAN, token.NULL:
 		return p.parseLiteral()
+	case token.SHORT_QUOTE:
+		return p.parseShortQuote()
 	case token.LPAREN:
 		return p.parseList()
 	}

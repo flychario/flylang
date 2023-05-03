@@ -16,8 +16,8 @@ program       {element} {element}*
 %%
 "("   { printf("LPAREN "); }
 ")"   { printf("RPAREN "); }
-"quote" { printf("QUOTE "); }
-"'("  { printf("QUOTE "); }
+"quote" { printf("SHORT_QUOTE "); }
+"'("  { printf("SHORT_QUOTE "); }
 "setq" { printf("SETQ "); }
 "func" { printf("FUNC "); }
 "lambda" { printf("LAMBDA "); }
@@ -46,6 +46,7 @@ const (
 
 	LPAREN
 	RPAREN
+	SHORT_QUOTE
 	QUOTE
 	PLUS
 	MINUS
@@ -69,12 +70,13 @@ var tokens = [...]string{
 	REAL:       "REAL",
 	BOOLEAN:    "BOOLEAN",
 
-	LPAREN: "(",
-	RPAREN: ")",
-	QUOTE:  "'",
-	PLUS:   "+",
-	MINUS:  "-",
+	LPAREN:      "(",
+	RPAREN:      ")",
+	SHORT_QUOTE: "'",
+	PLUS:        "+",
+	MINUS:       "-",
 
+	QUOTE:  "quote",
 	SETQ:   "setq",
 	FUNC:   "func",
 	LAMBDA: "lambda",
@@ -86,15 +88,16 @@ var tokens = [...]string{
 }
 
 var keywords = map[string]Token{
-	"setq":   SETQ,
-	"func":   FUNC,
-	"lambda": LAMBDA,
-	"prog":   PROG,
-	"cond":   COND,
-	"while":  WHILE,
-	"return": RETURN,
-	"break":  BREAK,
-	"quote":  QUOTE,
+	"setq":        SETQ,
+	"func":        FUNC,
+	"lambda":      LAMBDA,
+	"prog":        PROG,
+	"cond":        COND,
+	"while":       WHILE,
+	"return":      RETURN,
+	"break":       BREAK,
+	"short_quote": SHORT_QUOTE,
+	"quote":       QUOTE,
 }
 
 func (tok Token) String() string {

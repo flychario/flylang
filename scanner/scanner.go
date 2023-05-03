@@ -132,11 +132,16 @@ func (s *Scanner) Scan() (pos token.Position, tok token.Token, lit string) {
 	case ')':
 		tok = token.RPAREN
 	case '\'':
-		tok = token.QUOTE
+		tok = token.SHORT_QUOTE
 	case '+':
-		tok = token.PLUS
+		s.next()
+		tok, lit = s.scanNumber()
+		return
 	case '-':
-		tok = token.MINUS
+		s.next()
+		tok, lit = s.scanNumber()
+		lit = "-" + lit
+		return
 	default:
 		tok = token.ILLEGAL
 	}

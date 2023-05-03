@@ -24,6 +24,7 @@ const (
 	ElementTypeProgram
 
 	keywords
+	ElementTypeQuote
 	ElementTypeSetq
 	ElementTypeFunc
 	ElementTypeLambda
@@ -43,6 +44,7 @@ const (
 	LiteralTypeReal
 	LiteralTypeBoolean
 	LiteralTypeNull
+	LiteralTypeList
 )
 
 type Atom struct {
@@ -70,6 +72,10 @@ type LiteralNull struct {
 	Value interface{}
 }
 
+type LiteralList struct {
+	Value []Literal
+}
+
 type ListElement struct {
 	Elements []Element
 }
@@ -83,6 +89,7 @@ func (l LiteralInteger) ElementType() ElementType { return ElementTypeLiteral }
 func (l LiteralReal) ElementType() ElementType    { return ElementTypeLiteral }
 func (l LiteralBoolean) ElementType() ElementType { return ElementTypeLiteral }
 func (l LiteralNull) ElementType() ElementType    { return ElementTypeLiteral }
+func (l LiteralList) ElementType() ElementType    { return ElementTypeList }
 func (l ListElement) ElementType() ElementType    { return ElementTypeList }
 func (l ListElement) GetElements() []Element      { return l.Elements }
 func (p Program) ElementType() ElementType        { return ElementTypeProgram }
@@ -91,6 +98,11 @@ func (l LiteralInteger) Type() LiteralType { return LiteralTypeInteger }
 func (l LiteralReal) Type() LiteralType    { return LiteralTypeReal }
 func (l LiteralBoolean) Type() LiteralType { return LiteralTypeBoolean }
 func (l LiteralNull) Type() LiteralType    { return LiteralTypeNull }
+func (l LiteralList) Type() LiteralType    { return LiteralTypeList }
+
+type Quote struct {
+	Element Element
+}
 
 type Setq struct {
 	Atom    Atom
@@ -131,6 +143,7 @@ type Return struct {
 type Break struct {
 }
 
+func (q Quote) ElementType() ElementType  { return ElementTypeQuote }
 func (s Setq) ElementType() ElementType   { return ElementTypeSetq }
 func (f Func) ElementType() ElementType   { return ElementTypeFunc }
 func (l Lambda) ElementType() ElementType { return ElementTypeLambda }
@@ -140,6 +153,7 @@ func (w While) ElementType() ElementType  { return ElementTypeWhile }
 func (r Return) ElementType() ElementType { return ElementTypeReturn }
 func (b Break) ElementType() ElementType  { return ElementTypeBreak }
 
+func (q Quote) GetElements() []Element  { return []Element{q.Element} }
 func (s Setq) GetElements() []Element   { return []Element{s.Element} }
 func (f Func) GetElements() []Element   { return []Element{f.List} }
 func (l Lambda) GetElements() []Element { return []Element{l.List} }

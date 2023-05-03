@@ -27,6 +27,9 @@ func (c *Context) Add(name string, value Element) {
 	} else if fun, ok := value.(Lambda); ok {
 		c.Values[name] = &fun
 		return
+	} else if fun, ok := value.(Prog); ok {
+		c.Values[name] = &fun
+		return
 	} else if atom, ok := value.(Builtin); ok {
 		c.Values[name] = &atom
 		return
@@ -88,6 +91,10 @@ func (l ListElement) Eval(c *Context) Element {
 func (f Func) Eval(c *Context) Element {
 	c.Add(f.Atom.Name, Lambda{f.List, f.SubProg})
 	return f.Atom
+} //  `go run main.go file`
+
+func (q Quote) Eval(c *Context) Element {
+	return q.Element
 }
 
 func (s Setq) Eval(c *Context) Element {
@@ -96,6 +103,10 @@ func (s Setq) Eval(c *Context) Element {
 }
 
 func (l Lambda) Eval(c *Context) Element {
+	return l
+}
+
+func (l Prog) Eval(c *Context) Element {
 	return l
 }
 
@@ -125,6 +136,26 @@ func (p Program) Eval(c *Context) []Element {
 }
 
 func (l Lambda) Call(c *Context, args []Element) (res Element) {
+	if len(l.List.GetElements()) > len(args) {
+		panic("not enough arguments")
+	} else if len(l.List.GetElements()) < len(args) {
+		panic("too many arguments")
+	}
+
+	newContext := NewContext(c)
+	for i, arg := range args {
+		newContext.Add(l.List.GetElements()[i].(Atom).Name, arg)
+	}
+
+	for _, e := range l.SubProg.Elements {
+		res = e.Eval(newContext)
+
+		// TODO: Handle return
+	}
+	return res
+}
+
+func (l Prog) Call(c *Context, args []Element) (res Element) {
 	if len(l.List.GetElements()) > len(args) {
 		panic("not enough arguments")
 	} else if len(l.List.GetElements()) < len(args) {
