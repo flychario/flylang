@@ -340,32 +340,18 @@ var Builtins = []Builtin{
 		Name: "isatom",
 		Args: []Element{Atom{"a"}},
 		Code: func(c *Context, args []Element) Element {
-			ae := args[0].Eval(c)
+			var isElementType = args[0].ElementType() == ElementTypeAtom
 
-			var isElementType = ae.ElementType() == ElementTypeAtom
-			var isValidLiteralType = false
-
-			if isElementType {
-				isValidLiteralType = ae.(Literal).Type() == LiteralTypeNull
-			}
-
-			return LiteralBoolean{isValidLiteralType}
+			return LiteralBoolean{isElementType}
 		},
 	},
 	{
 		Name: "islist",
 		Args: []Element{Atom{"a"}},
 		Code: func(c *Context, args []Element) Element {
-			ae := args[0].Eval(c)
+			var isElementType = args[0].ElementType() == ElementTypeList
 
-			var isElementType = ae.ElementType() == ElementTypeLiteral
-			var isValidLiteralType = false
-
-			if isElementType {
-				isValidLiteralType = ae.(Literal).Type() == LiteralTypeList
-			}
-
-			return LiteralBoolean{isValidLiteralType}
+			return LiteralBoolean{isElementType}
 		},
 	},
 }

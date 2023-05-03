@@ -1,0 +1,3 @@
+(setq x 5)
+(while (greater x 0) (setq x (minus x 1)))
+x

@@ -127,6 +127,27 @@ func (cond Cond) Eval(c *Context) Element {
 	return LiteralNull{}
 }
 
+func (w While) Eval(c *Context) Element {
+	for true {
+		body := w.Element1.Eval(c)
+		if body.ElementType() != ElementTypeLiteral {
+			panic("cond body evaluated to non-literal")
+		}
+		val := body.(Literal)
+		if val.Type() != LiteralTypeBoolean {
+			panic("cond body evaluated to non-boolean")
+		}
+		if val.(LiteralBoolean).Value {
+			w.Element2.Eval(c)
+			println("Evaluated!")
+		} else {
+			println("Not valuated!")
+			break
+		}
+	}
+	return LiteralNull{}
+}
+
 func (p Program) Eval(c *Context) []Element {
 	res := make([]Element, len(p.Elements))
 	for i, e := range p.Elements {

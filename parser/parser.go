@@ -78,8 +78,8 @@ func (p *Parser) parseList() ast.List {
 		return p.parseCond()
 	case token.QUOTE:
 		return p.parseQuote()
-		//case token.WHILE:
-		//	return p.parseWhile()
+	case token.WHILE:
+		return p.parseWhile()
 		//case token.RETURN:
 		//	return p.parseReturn()
 		//case token.BREAK:
