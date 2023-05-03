@@ -1,0 +1,4 @@
+(setq x 5)
+(return x)
+(setq x 6)
+x

@@ -133,7 +133,7 @@ type Cond struct {
 
 type While struct {
 	Element1 Element
-	Element2 Element
+	Element2 Program
 }
 
 type Return struct {

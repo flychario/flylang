@@ -45,5 +45,5 @@ func main() {
 
 	c := ast.GetGlobalContext()
 	execRes := program.Eval(c)
-	fmt.Printf("\n%v", execRes[len(execRes)-1])
+	fmt.Printf("\n%v", execRes)
 }

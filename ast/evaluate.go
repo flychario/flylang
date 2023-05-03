@@ -128,6 +128,20 @@ func (cond Cond) Eval(c *Context) Element {
 }
 
 func (w While) Eval(c *Context) Element {
+	defer func() {
+		if r := recover(); r != nil { // Check if we get element from panic, otherwise it is error message
+			if elem, ok := r.(Element); ok {
+				if elem.ElementType() == ElementTypeBreak { // If it is not break it can be element from return
+
+				} else {
+					panic(r) // panic again with element for return
+				}
+			} else {
+				panic(r) // panic again with error message
+			}
+		}
+	}()
+
 	for true {
 		body := w.Element1.Eval(c)
 		if body.ElementType() != ElementTypeLiteral {
@@ -138,21 +152,31 @@ func (w While) Eval(c *Context) Element {
 			panic("cond body evaluated to non-boolean")
 		}
 		if val.(LiteralBoolean).Value {
-			w.Element2.Eval(c)
-			println("Evaluated!")
+			for _, elem := range w.Element2.Elements {
+				elem.Eval(c)
+			}
 		} else {
-			println("Not valuated!")
 			break
 		}
 	}
 	return LiteralNull{}
 }
 
-func (p Program) Eval(c *Context) []Element {
-	res := make([]Element, len(p.Elements))
-	for i, e := range p.Elements {
-		res[i] = e.Eval(c)
+func (p Program) Eval(c *Context) (res Element) {
+	defer func() {
+		if r := recover(); r != nil { // Check if we get element from panic, otherwise it is error message
+			if elem, ok := r.(Element); ok {
+				res = elem
+			} else {
+				panic(r) // panic again with error message
+			}
+		}
+	}()
+
+	for _, e := range p.Elements {
+		res = e.Eval(c)
 	}
+
 	return res
 }
 
@@ -168,10 +192,18 @@ func (l Lambda) Call(c *Context, args []Element) (res Element) {
 		newContext.Add(l.List.GetElements()[i].(Atom).Name, arg)
 	}
 
+	defer func() {
+		if r := recover(); r != nil { // Check if we get element from panic, otherwise it is error message
+			if elem, ok := r.(Element); ok {
+				res = elem
+			} else {
+				panic(r) // panic again with error message
+			}
+		}
+	}()
+
 	for _, e := range l.SubProg.Elements {
 		res = e.Eval(newContext)
-
-		// TODO: Handle return
 	}
 	return res
 }
@@ -188,10 +220,32 @@ func (l Prog) Call(c *Context, args []Element) (res Element) {
 		newContext.Add(l.List.GetElements()[i].(Atom).Name, arg)
 	}
 
+	defer func() {
+		if r := recover(); r != nil { // Check if we get element from panic, otherwise it is error message
+			if elem, ok := r.(Element); ok {
+				res = elem
+			} else {
+				panic(r) // panic again with error message
+			}
+		}
+	}()
+
 	for _, e := range l.SubProg.Elements {
 		res = e.Eval(newContext)
 
-		// TODO: Handle return
 	}
 	return res
+}
+
+func (r Return) Eval(c *Context) Element {
+	var elem = r.Element.Eval(c)
+
+	panic(elem)
+
+	return elem
+}
+
+func (r Break) Eval(c *Context) Element {
+	panic(r)
+	return nil
 }

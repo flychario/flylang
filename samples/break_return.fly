@@ -1,0 +1,6 @@
+(setq y 5)
+(func a ()
+    (while (greater y 0)
+        (setq y (minus y 1))
+        (cond (equal y 3) (return y))))
+(a)

@@ -170,12 +170,12 @@ var Builtins = []Builtin{
 				return LiteralBoolean{a.(LiteralReal).Value != b.(LiteralReal).Value}
 			} else if a.Type() == LiteralTypeInteger && b.Type() == LiteralTypeReal {
 				return LiteralBoolean{float64(a.(LiteralInteger).Value) != b.(LiteralReal).Value}
-			} else if a.Type() == LiteralTypeReal && b.Type() != LiteralTypeInteger {
-				return LiteralBoolean{a.(LiteralReal).Value == float64(b.(LiteralInteger).Value)}
-			} else if a.Type() == LiteralTypeBoolean && b.Type() != LiteralTypeBoolean {
-				return LiteralBoolean{a.(LiteralBoolean).Value == b.(LiteralBoolean).Value}
-			} else if a.Type() == LiteralTypeNull && b.Type() != LiteralTypeNull {
-				return LiteralBoolean{true}
+			} else if a.Type() == LiteralTypeReal && b.Type() == LiteralTypeInteger {
+				return LiteralBoolean{a.(LiteralReal).Value != float64(b.(LiteralInteger).Value)}
+			} else if a.Type() == LiteralTypeBoolean && b.Type() == LiteralTypeBoolean {
+				return LiteralBoolean{a.(LiteralBoolean).Value != b.(LiteralBoolean).Value}
+			} else if a.Type() == LiteralTypeNull && b.Type() == LiteralTypeNull {
+				return LiteralBoolean{false}
 			}
 			panic(fmt.Sprintf("Can't compare %s and %s", a, b))
 		},
@@ -352,6 +352,146 @@ var Builtins = []Builtin{
 			var isElementType = args[0].ElementType() == ElementTypeList
 
 			return LiteralBoolean{isElementType}
+		},
+	},
+	{
+		Name: "and",
+		Args: []Element{Atom{"a"}, Atom{"b"}},
+		Code: func(c *Context, args []Element) Element {
+			ae := args[0].Eval(c)
+			be := args[1].Eval(c)
+
+			if ae.ElementType() != ElementTypeLiteral || be.ElementType() != ElementTypeLiteral {
+				panic(fmt.Sprintf("Can't use logical operator on %s and %s", ae, be))
+			}
+			a := ae.(Literal)
+			b := be.(Literal)
+
+			if a.Type() == LiteralTypeBoolean && b.Type() == LiteralTypeBoolean {
+				av := a.(LiteralBoolean).Value
+				bv := b.(LiteralBoolean).Value
+
+				return LiteralBoolean{av && bv}
+			}
+			panic(fmt.Sprintf("Can't use logical operator on %s and %s", a, b))
+		},
+	},
+	{
+		Name: "or",
+		Args: []Element{Atom{"a"}, Atom{"b"}},
+		Code: func(c *Context, args []Element) Element {
+			ae := args[0].Eval(c)
+			be := args[1].Eval(c)
+
+			if ae.ElementType() != ElementTypeLiteral || be.ElementType() != ElementTypeLiteral {
+				panic(fmt.Sprintf("Can't use logical operator on %s and %s", ae, be))
+			}
+			a := ae.(Literal)
+			b := be.(Literal)
+
+			if a.Type() == LiteralTypeBoolean && b.Type() == LiteralTypeBoolean {
+				av := a.(LiteralBoolean).Value
+				bv := b.(LiteralBoolean).Value
+
+				return LiteralBoolean{av || bv}
+			}
+			panic(fmt.Sprintf("Can't use logical operator on %s and %s", a, b))
+		},
+	},
+	{
+		Name: "xor",
+		Args: []Element{Atom{"a"}, Atom{"b"}},
+		Code: func(c *Context, args []Element) Element {
+			ae := args[0].Eval(c)
+			be := args[1].Eval(c)
+
+			if ae.ElementType() != ElementTypeLiteral || be.ElementType() != ElementTypeLiteral {
+				panic(fmt.Sprintf("Can't use logical operator on %s and %s", ae, be))
+			}
+			a := ae.(Literal)
+			b := be.(Literal)
+
+			if a.Type() == LiteralTypeBoolean && b.Type() == LiteralTypeBoolean {
+				av := a.(LiteralBoolean).Value
+				bv := b.(LiteralBoolean).Value
+
+				return LiteralBoolean{(av || bv) && !(av && bv)}
+			}
+			panic(fmt.Sprintf("Can't use logical operator on %s and %s", a, b))
+		},
+	},
+	{
+		Name: "not",
+		Args: []Element{Atom{"a"}},
+		Code: func(c *Context, args []Element) Element {
+			ae := args[0].Eval(c)
+
+			if ae.ElementType() != ElementTypeLiteral {
+				panic(fmt.Sprintf("Can't use logical operator on %s", ae))
+			}
+			a := ae.(Literal)
+
+			if a.Type() == LiteralTypeBoolean {
+				av := a.(LiteralBoolean).Value
+
+				return LiteralBoolean{!av}
+			}
+			panic(fmt.Sprintf("Can't use logical operator on %s", a))
+		},
+	},
+	{
+		Name: "head",
+		Args: []Element{Atom{"a"}},
+		Code: func(c *Context, args []Element) Element {
+
+			if args[0].ElementType() != ElementTypeList {
+				panic(fmt.Sprintf("Can't use list operators on %s", args[0]))
+			}
+
+			av := args[0].(List)
+
+			if len(av.GetElements()) <= 0 {
+				panic(fmt.Sprintf("Cannot get element from empty list"))
+			} else {
+				return av.GetElements()[0]
+			}
+		},
+	},
+	{
+		Name: "tail",
+		Args: []Element{Atom{"a"}},
+		Code: func(c *Context, args []Element) Element {
+			if args[0].ElementType() != ElementTypeList {
+				panic(fmt.Sprintf("Can't use list operators on %s", args[0]))
+			}
+
+			av := args[0].(List)
+
+			if len(av.GetElements()) <= 0 {
+				panic(fmt.Sprintf("Cannot get elements from empty list"))
+			} else {
+				return ListElement{av.GetElements()[1:]}
+			}
+		},
+	},
+	{
+		Name: "cons",
+		Args: []Element{Atom{"a"}, Atom{"b"}},
+		Code: func(c *Context, args []Element) Element {
+			if args[1].ElementType() != ElementTypeList {
+				panic(fmt.Sprintf("Can't use list operators on %s", args[1]))
+			}
+
+			bv := args[1].(List)
+
+			return ListElement{append([]Element{args[0]}, bv.GetElements()...)}
+		},
+	},
+	{
+		Name: "eval",
+		Args: []Element{Atom{"a"}},
+		Code: func(c *Context, args []Element) Element {
+			return args[0].Eval(c)
 		},
 	},
 }

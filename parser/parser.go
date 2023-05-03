@@ -80,10 +80,10 @@ func (p *Parser) parseList() ast.List {
 		return p.parseQuote()
 	case token.WHILE:
 		return p.parseWhile()
-		//case token.RETURN:
-		//	return p.parseReturn()
-		//case token.BREAK:
-		//	return p.parseBreak()
+	case token.RETURN:
+		return p.parseReturn()
+	case token.BREAK:
+		return p.parseBreak()
 	}
 
 	for p.tok != token.RPAREN {
@@ -177,7 +177,7 @@ func (p *Parser) parseCond() ast.Cond {
 
 func (p *Parser) parseWhile() ast.While {
 	p.expect(token.WHILE)
-	return ast.While{Element1: p.parseElement(), Element2: p.parseElement()}
+	return ast.While{Element1: p.parseElement(), Element2: p.ParseSubProgram()}
 }
 
 func (p *Parser) parseReturn() ast.Return {
