@@ -239,13 +239,9 @@ func (l Prog) Call(c *Context, args []Element) (res Element) {
 
 func (r Return) Eval(c *Context) Element {
 	var elem = r.Element.Eval(c)
-
 	panic(elem)
-
-	return elem
 }
 
-func (r Break) Eval(c *Context) Element {
-	panic(r)
-	return nil
+func (b Break) Eval(c *Context) Element {
+	panic(b)
 }
