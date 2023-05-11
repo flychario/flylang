@@ -1,6 +1,8 @@
 package ast
 
-import "fmt"
+import (
+	"fmt"
+)
 
 type Builtin struct {
 	Name string
@@ -18,7 +20,7 @@ func (b Builtin) Eval(c *Context) Element {
 
 func (b Builtin) Call(c *Context, args []Element) Element {
 	if len(args) != len(b.Args) {
-		panic(fmt.Sprintf("Wrong number of arguments to %s: %d != %d", b.Name, len(args), len(b.Args)))
+		CreateEvaluateError(fmt.Sprintf("Wrong number of arguments to %s: %d != %d", b.Name, len(args), len(b.Args)))
 	}
 	return b.Code(c, args)
 }
@@ -39,7 +41,7 @@ var Builtins = []Builtin{
 			ae := args[0].Eval(c)
 			be := args[1].Eval(c)
 			if ae.ElementType() != ElementTypeLiteral || be.ElementType() != ElementTypeLiteral {
-				panic(fmt.Sprintf("Can't add %s and %s", ae, be))
+				CreateEvaluateError(fmt.Sprintf("Can't add %v and %v", ae, be))
 			}
 			a := ae.(Literal)
 			b := be.(Literal)
@@ -53,7 +55,8 @@ var Builtins = []Builtin{
 			} else if a.Type() == LiteralTypeReal && b.Type() == LiteralTypeInteger {
 				return LiteralReal{a.(LiteralReal).Value + float64(b.(LiteralInteger).Value)}
 			}
-			panic(fmt.Sprintf("Can't add %s and %s", a, b))
+			CreateEvaluateError(fmt.Sprintf("Can't add %v and %v", a, b))
+			return nil
 		},
 	},
 	{
@@ -63,7 +66,7 @@ var Builtins = []Builtin{
 			ae := args[0].Eval(c)
 			be := args[1].Eval(c)
 			if ae.ElementType() != ElementTypeLiteral || be.ElementType() != ElementTypeLiteral {
-				panic(fmt.Sprintf("Can't add %s and %s", ae, be))
+				CreateEvaluateError(fmt.Sprintf("Can't add %s and %s", ae, be))
 			}
 			a := ae.(Literal)
 			b := be.(Literal)
@@ -77,7 +80,8 @@ var Builtins = []Builtin{
 			} else if a.Type() == LiteralTypeReal && b.Type() == LiteralTypeInteger {
 				return LiteralReal{a.(LiteralReal).Value - float64(b.(LiteralInteger).Value)}
 			}
-			panic(fmt.Sprintf("Can't subtract %s and %s", a, b))
+			CreateEvaluateError(fmt.Sprintf("Can't subtract %s and %s", a, b))
+			return nil
 		},
 	},
 	{
@@ -87,7 +91,7 @@ var Builtins = []Builtin{
 			ae := args[0].Eval(c)
 			be := args[1].Eval(c)
 			if ae.ElementType() != ElementTypeLiteral || be.ElementType() != ElementTypeLiteral {
-				panic(fmt.Sprintf("Can't add %s and %s", ae, be))
+				CreateEvaluateError(fmt.Sprintf("Can't add %s and %s", ae, be))
 			}
 			a := ae.(Literal)
 			b := be.(Literal)
@@ -100,7 +104,8 @@ var Builtins = []Builtin{
 			} else if a.Type() == LiteralTypeReal && b.Type() == LiteralTypeInteger {
 				return LiteralReal{a.(LiteralReal).Value * float64(b.(LiteralInteger).Value)}
 			}
-			panic(fmt.Sprintf("Can't multiply %s and %s", a, b))
+			CreateEvaluateError(fmt.Sprintf("Can't multiply %s and %s", a, b))
+			return nil
 		},
 	},
 	{
@@ -110,7 +115,7 @@ var Builtins = []Builtin{
 			ae := args[0].Eval(c)
 			be := args[1].Eval(c)
 			if ae.ElementType() != ElementTypeLiteral || be.ElementType() != ElementTypeLiteral {
-				panic(fmt.Sprintf("Can't add %s and %s", ae, be))
+				CreateEvaluateError(fmt.Sprintf("Can't add %s and %s", ae, be))
 			}
 			a := ae.(Literal)
 			b := be.(Literal)
@@ -123,7 +128,8 @@ var Builtins = []Builtin{
 			} else if a.Type() == LiteralTypeReal && b.Type() == LiteralTypeInteger {
 				return LiteralReal{a.(LiteralReal).Value / float64(b.(LiteralInteger).Value)}
 			}
-			panic(fmt.Sprintf("Can't divide %s and %s", a, b))
+			CreateEvaluateError(fmt.Sprintf("Can't divide %s and %s", a, b))
+			return nil
 		},
 	},
 	{
@@ -133,7 +139,7 @@ var Builtins = []Builtin{
 			ae := args[0].Eval(c)
 			be := args[1].Eval(c)
 			if ae.ElementType() != ElementTypeLiteral || be.ElementType() != ElementTypeLiteral {
-				panic(fmt.Sprintf("Can't compare %s and %s", ae, be))
+				CreateEvaluateError(fmt.Sprintf("Can't compare %s and %s", ae, be))
 			}
 			a := ae.(Literal)
 			b := be.(Literal)
@@ -150,7 +156,8 @@ var Builtins = []Builtin{
 			} else if a.Type() == LiteralTypeNull && b.Type() == LiteralTypeNull {
 				return LiteralBoolean{true}
 			}
-			panic(fmt.Sprintf("Can't compare %s and %s", a, b))
+			CreateEvaluateError(fmt.Sprintf("Can't compare %s and %s", a, b))
+			return nil
 		},
 	},
 	{
@@ -160,7 +167,7 @@ var Builtins = []Builtin{
 			ae := args[0].Eval(c)
 			be := args[1].Eval(c)
 			if ae.ElementType() != ElementTypeLiteral || be.ElementType() != ElementTypeLiteral {
-				panic(fmt.Sprintf("Can't compare %s and %s", ae, be))
+				CreateEvaluateError(fmt.Sprintf("Can't compare %s and %s", ae, be))
 			}
 			a := ae.(Literal)
 			b := be.(Literal)
@@ -176,8 +183,11 @@ var Builtins = []Builtin{
 				return LiteralBoolean{a.(LiteralBoolean).Value != b.(LiteralBoolean).Value}
 			} else if a.Type() == LiteralTypeNull && b.Type() == LiteralTypeNull {
 				return LiteralBoolean{false}
+			} else if a.Type() == LiteralTypeNull && b.Type() == LiteralTypeNull {
+				return LiteralBoolean{false}
 			}
-			panic(fmt.Sprintf("Can't compare %s and %s", a, b))
+			CreateEvaluateError(fmt.Sprintf("Can't compare %s and %s", a, b))
+			return nil
 		},
 	},
 	{
@@ -187,7 +197,7 @@ var Builtins = []Builtin{
 			ae := args[0].Eval(c)
 			be := args[1].Eval(c)
 			if ae.ElementType() != ElementTypeLiteral || be.ElementType() != ElementTypeLiteral {
-				panic(fmt.Sprintf("Can't compare %s and %s", ae, be))
+				CreateEvaluateError(fmt.Sprintf("Can't compare %s and %s", ae, be))
 			}
 			a := ae.(Literal)
 			b := be.(Literal)
@@ -200,7 +210,8 @@ var Builtins = []Builtin{
 			} else if a.Type() == LiteralTypeReal && b.Type() == LiteralTypeInteger {
 				return LiteralBoolean{a.(LiteralReal).Value < float64(b.(LiteralInteger).Value)}
 			}
-			panic(fmt.Sprintf("Can't compare %s and %s", a, b))
+			CreateEvaluateError(fmt.Sprintf("Can't compare %s and %s", a, b))
+			return nil
 		},
 	},
 	{
@@ -210,7 +221,7 @@ var Builtins = []Builtin{
 			ae := args[0].Eval(c)
 			be := args[1].Eval(c)
 			if ae.ElementType() != ElementTypeLiteral || be.ElementType() != ElementTypeLiteral {
-				panic(fmt.Sprintf("Can't add %s and %s", ae, be))
+				CreateEvaluateError(fmt.Sprintf("Can't add %s and %s", ae, be))
 			}
 			a := ae.(Literal)
 			b := be.(Literal)
@@ -223,7 +234,8 @@ var Builtins = []Builtin{
 			} else if a.Type() == LiteralTypeReal && b.Type() == LiteralTypeInteger {
 				return LiteralBoolean{a.(LiteralReal).Value <= float64(b.(LiteralInteger).Value)}
 			}
-			panic(fmt.Sprintf("Can't compare %s and %s", a, b))
+			CreateEvaluateError(fmt.Sprintf("Can't compare %s and %s", a, b))
+			return nil
 		},
 	},
 	{
@@ -233,7 +245,7 @@ var Builtins = []Builtin{
 			ae := args[0].Eval(c)
 			be := args[1].Eval(c)
 			if ae.ElementType() != ElementTypeLiteral || be.ElementType() != ElementTypeLiteral {
-				panic(fmt.Sprintf("Can't compare %s and %s", ae, be))
+				CreateEvaluateError(fmt.Sprintf("Can't compare %s and %s", ae, be))
 			}
 			a := ae.(Literal)
 			b := be.(Literal)
@@ -246,7 +258,8 @@ var Builtins = []Builtin{
 			} else if a.Type() == LiteralTypeReal && b.Type() == LiteralTypeInteger {
 				return LiteralBoolean{a.(LiteralReal).Value > float64(b.(LiteralInteger).Value)}
 			}
-			panic(fmt.Sprintf("Can't compare %s and %s", a, b))
+			CreateEvaluateError(fmt.Sprintf("Can't compare %s and %s", a, b))
+			return nil
 		},
 	},
 	{
@@ -256,7 +269,7 @@ var Builtins = []Builtin{
 			ae := args[0].Eval(c)
 			be := args[1].Eval(c)
 			if ae.ElementType() != ElementTypeLiteral || be.ElementType() != ElementTypeLiteral {
-				panic(fmt.Sprintf("Can't compare %s and %s", ae, be))
+				CreateEvaluateError(fmt.Sprintf("Can't compare %s and %s", ae, be))
 			}
 			a := ae.(Literal)
 			b := be.(Literal)
@@ -269,7 +282,8 @@ var Builtins = []Builtin{
 			} else if a.Type() == LiteralTypeReal && b.Type() == LiteralTypeInteger {
 				return LiteralBoolean{a.(LiteralReal).Value >= float64(b.(LiteralInteger).Value)}
 			}
-			panic(fmt.Sprintf("Can't compare %s and %s", a, b))
+			CreateEvaluateError(fmt.Sprintf("Can't compare %s and %s", a, b))
+			return nil
 		},
 	},
 	{
@@ -362,7 +376,7 @@ var Builtins = []Builtin{
 			be := args[1].Eval(c)
 
 			if ae.ElementType() != ElementTypeLiteral || be.ElementType() != ElementTypeLiteral {
-				panic(fmt.Sprintf("Can't use logical operator on %s and %s", ae, be))
+				CreateEvaluateError(fmt.Sprintf("Can't use logical operator on %s and %s", ae, be))
 			}
 			a := ae.(Literal)
 			b := be.(Literal)
@@ -373,7 +387,8 @@ var Builtins = []Builtin{
 
 				return LiteralBoolean{av && bv}
 			}
-			panic(fmt.Sprintf("Can't use logical operator on %s and %s", a, b))
+			CreateEvaluateError(fmt.Sprintf("Can't use logical operator on %s and %s", a, b))
+			return nil
 		},
 	},
 	{
@@ -406,7 +421,7 @@ var Builtins = []Builtin{
 			be := args[1].Eval(c)
 
 			if ae.ElementType() != ElementTypeLiteral || be.ElementType() != ElementTypeLiteral {
-				panic(fmt.Sprintf("Can't use logical operator on %s and %s", ae, be))
+				CreateEvaluateError(fmt.Sprintf("Can't use logical operator on %s and %s", ae, be))
 			}
 			a := ae.(Literal)
 			b := be.(Literal)
@@ -417,7 +432,8 @@ var Builtins = []Builtin{
 
 				return LiteralBoolean{(av || bv) && !(av && bv)}
 			}
-			panic(fmt.Sprintf("Can't use logical operator on %s and %s", a, b))
+			CreateEvaluateError(fmt.Sprintf("Can't use logical operator on %s and %s", a, b))
+			return nil
 		},
 	},
 	{
@@ -427,7 +443,7 @@ var Builtins = []Builtin{
 			ae := args[0].Eval(c)
 
 			if ae.ElementType() != ElementTypeLiteral {
-				panic(fmt.Sprintf("Can't use logical operator on %s", ae))
+				CreateEvaluateError(fmt.Sprintf("Can't use logical operator on %s", ae))
 			}
 			a := ae.(Literal)
 
@@ -436,7 +452,8 @@ var Builtins = []Builtin{
 
 				return LiteralBoolean{!av}
 			}
-			panic(fmt.Sprintf("Can't use logical operator on %s", a))
+			CreateEvaluateError(fmt.Sprintf("Can't use logical operator on %s", a))
+			return nil
 		},
 	},
 	{
@@ -445,13 +462,13 @@ var Builtins = []Builtin{
 		Code: func(c *Context, args []Element) Element {
 
 			if args[0].ElementType() != ElementTypeList {
-				panic(fmt.Sprintf("Can't use list operators on %s", args[0]))
+				CreateEvaluateError(fmt.Sprintf("Can't use list operators on %s", args[0]))
 			}
 
 			av := args[0].(List)
 
 			if len(av.GetElements()) <= 0 {
-				panic(fmt.Sprintf("Cannot get element from empty list"))
+				return LiteralNull{}
 			} else {
 				return av.GetElements()[0]
 			}
@@ -462,13 +479,13 @@ var Builtins = []Builtin{
 		Args: []Element{Atom{"a"}},
 		Code: func(c *Context, args []Element) Element {
 			if args[0].ElementType() != ElementTypeList {
-				panic(fmt.Sprintf("Can't use list operators on %s", args[0]))
+				CreateEvaluateError(fmt.Sprintf("Can't use list operators on %s", args[0]))
 			}
 
 			av := args[0].(List)
 
 			if len(av.GetElements()) <= 0 {
-				panic(fmt.Sprintf("Cannot get elements from empty list"))
+				return ListElement{}
 			} else {
 				return ListElement{av.GetElements()[1:]}
 			}
@@ -479,7 +496,7 @@ var Builtins = []Builtin{
 		Args: []Element{Atom{"a"}, Atom{"b"}},
 		Code: func(c *Context, args []Element) Element {
 			if args[1].ElementType() != ElementTypeList {
-				panic(fmt.Sprintf("Can't use list operators on %s", args[1]))
+				CreateEvaluateError(fmt.Sprintf("Can't use list operators on %s", args[1]))
 			}
 
 			bv := args[1].(List)
@@ -494,6 +511,15 @@ var Builtins = []Builtin{
 			return args[0].Eval(c)
 		},
 	},
+}
+
+func GetBuiltinByName(name string) *Builtin {
+	for _, b := range Builtins {
+		if b.Name == name {
+			return &b
+		}
+	}
+	return nil
 }
 
 func initBuiltins(c *Context) {

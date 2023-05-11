@@ -1,0 +1,13 @@
+(func implication (a b)
+    (or
+        (not a)
+        b))
+
+(func xnor (a b)
+    (not
+        (xor a b)))
+
+(setq impl (implication true false))
+(setq xn (xnor false false))
+
+(and impl xn)

@@ -33,9 +33,12 @@ func (c *Context) Add(name string, value Element) {
 	} else if atom, ok := value.(Builtin); ok {
 		c.Values[name] = &atom
 		return
+	} else if lst, ok := value.(List); ok {
+		c.Values[name] = lst
+		return
 	}
 
-	panic(fmt.Sprintf("Can't add value to context %s: %s", name, value.ElementType()))
+	CreateEvaluateError(fmt.Sprintf("Can't add value to context %s: %v", name, value.ElementType()))
 }
 
 func (c *Context) Get(name string) Element {
@@ -53,7 +56,8 @@ func (a Atom) Eval(c *Context) Element {
 	if val != nil {
 		return val
 	}
-	panic("undefined variable: " + a.Name)
+	CreateEvaluateError("undefined variable: " + a.Name)
+	return nil
 }
 
 func (l LiteralInteger) Eval(c *Context) Element {
@@ -72,6 +76,10 @@ func (l LiteralNull) Eval(c *Context) Element {
 	return l
 }
 
+func (l LiteralList) Eval(c *Context) Element {
+	return l
+}
+
 func (l ListElement) Eval(c *Context) Element {
 	evaluated := make([]Element, len(l.Elements))
 	for i, elem := range l.Elements {
@@ -85,7 +93,8 @@ func (l ListElement) Eval(c *Context) Element {
 	if fun, ok := evaluated[0].(Callable); ok {
 		return fun.Call(c, evaluated[1:])
 	}
-	panic("The first element of a list must be a function")
+	CreateEvaluateError("The first element of a list must be a function")
+	return nil
 }
 
 func (f Func) Eval(c *Context) Element {
@@ -113,11 +122,11 @@ func (l Prog) Eval(c *Context) Element {
 func (cond Cond) Eval(c *Context) Element {
 	body := cond.List.Eval(c)
 	if body.ElementType() != ElementTypeLiteral {
-		panic("cond body evaluated to non-literal")
+		CreateEvaluateError("cond body evaluated to non-literal")
 	}
 	val := body.(Literal)
 	if val.Type() != LiteralTypeBoolean {
-		panic("cond body evaluated to non-boolean")
+		CreateEvaluateError("cond body evaluated to non-boolean")
 	}
 	if val.(LiteralBoolean).Value {
 		return cond.Element1.Eval(c)
@@ -145,11 +154,11 @@ func (w While) Eval(c *Context) Element {
 	for true {
 		body := w.Element1.Eval(c)
 		if body.ElementType() != ElementTypeLiteral {
-			panic("cond body evaluated to non-literal")
+			CreateEvaluateError("cond body evaluated to non-literal")
 		}
 		val := body.(Literal)
 		if val.Type() != LiteralTypeBoolean {
-			panic("cond body evaluated to non-boolean")
+			CreateEvaluateError("cond body evaluated to non-boolean")
 		}
 		if val.(LiteralBoolean).Value {
 			for _, elem := range w.Element2.Elements {
@@ -182,9 +191,9 @@ func (p Program) Eval(c *Context) (res Element) {
 
 func (l Lambda) Call(c *Context, args []Element) (res Element) {
 	if len(l.List.GetElements()) > len(args) {
-		panic("not enough arguments")
+		CreateEvaluateError("not enough arguments in lambda call")
 	} else if len(l.List.GetElements()) < len(args) {
-		panic("too many arguments")
+		CreateEvaluateError("too many arguments in lambda call")
 	}
 
 	newContext := NewContext(c)
@@ -210,9 +219,9 @@ func (l Lambda) Call(c *Context, args []Element) (res Element) {
 
 func (l Prog) Call(c *Context, args []Element) (res Element) {
 	if len(l.List.GetElements()) > len(args) {
-		panic("not enough arguments")
+		CreateEvaluateError("not enough arguments in program call")
 	} else if len(l.List.GetElements()) < len(args) {
-		panic("too many arguments")
+		CreateEvaluateError("too many arguments in program call")
 	}
 
 	newContext := NewContext(c)

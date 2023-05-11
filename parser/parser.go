@@ -1,6 +1,7 @@
 package parser
 
 import (
+	"fmt"
 	"github.com/flychario/flylang/ast"
 	"github.com/flychario/flylang/scanner"
 	"github.com/flychario/flylang/token"
@@ -9,19 +10,7 @@ import (
 
 // The Parser structure holds the Parser's internal state.
 type Parser struct {
-	//file    *token.File
-	//errors  scanner.ErrorList
 	scanner scanner.Scanner
-
-	// Tracing/debugging
-	//mode   Mode // parsing mode
-	//trace  bool // == (mode&Trace != 0)
-	//indent int  // indentation used for tracing output
-
-	// Comments
-	//comments    []*ast.CommentGroup
-	//leadComment *ast.CommentGroup // last lead comment
-	//lineComment *ast.CommentGroup // last line comment
 
 	// Next token
 	pos token.Position // token position
@@ -30,32 +19,18 @@ type Parser struct {
 }
 
 func (p *Parser) Init(filename string, src []byte) {
-	//p.file = fset.AddFile(filename, -1, len(src))
-	//var m scanner.Mode
-	//if mode&ParseComments != 0 {
-	//	m = scanner.ScanComments
-	//}
-	//eh := func(pos token.Position, msg string) { p.errors.Add(pos, msg) }
-	//p.scanner.Init(p.file, src, eh, m)
 	p.scanner.Init(src)
 
-	//p.mode = mode
-	//p.trace = mode&Trace != 0 // for convenience (p.trace is used frequently)
 	p.next()
 }
 
 func (p *Parser) next() {
-	//p.leadComment = nil
-	//p.lineComment = nil
-	//prev := p.pos
 	p.pos, p.tok, p.lit = p.scanner.Scan()
 }
 
 func (p *Parser) expect(tok token.Token) {
 	if p.tok != tok {
-		//p.errorExpected(p.pos, tok)
-		//p.advance(tok)
-		panic("expected " + tok.String())
+		p.ThrowError("expected " + tok.String())
 	}
 	p.next()
 }
@@ -97,7 +72,7 @@ func (p *Parser) parseLiteral() (ret ast.Literal) {
 	if p.tok == token.INTEGER {
 		val, err := strconv.ParseInt(p.lit, 10, 64)
 		if err != nil {
-			panic(err)
+			p.ThrowError(err.Error())
 		}
 		ret = ast.LiteralInteger{Value: val}
 		p.expect(token.INTEGER)
@@ -105,7 +80,7 @@ func (p *Parser) parseLiteral() (ret ast.Literal) {
 	} else if p.tok == token.REAL {
 		val, err := strconv.ParseFloat(p.lit, 64)
 		if err != nil {
-			panic(err)
+			p.ThrowError(err.Error())
 		}
 		ret = ast.LiteralReal{Value: val}
 		p.expect(token.REAL)
@@ -116,7 +91,7 @@ func (p *Parser) parseLiteral() (ret ast.Literal) {
 		} else if p.lit == "false" {
 			ret = ast.LiteralBoolean{Value: false}
 		} else {
-			panic("invalid boolean literal")
+			p.ThrowError("invalid boolean literal")
 		}
 		p.expect(token.BOOLEAN)
 		return ret
@@ -125,7 +100,8 @@ func (p *Parser) parseLiteral() (ret ast.Literal) {
 		p.expect(token.NULL)
 		return ret
 	}
-	panic("expected literal")
+	p.ThrowError("expected literal")
+	return
 }
 
 func (p *Parser) parseAtom() ast.Atom {
@@ -201,7 +177,9 @@ func (p *Parser) parseElement() ast.Element {
 	case token.LPAREN:
 		return p.parseList()
 	}
-	panic("expected element")
+
+	p.ThrowError("expected element")
+	return nil
 }
 
 func (p *Parser) ParseSubProgram() ast.Program {
@@ -218,4 +196,8 @@ func (p *Parser) ParseProgram() ast.Program {
 		elements = append(elements, p.parseElement())
 	}
 	return ast.Program{Elements: elements}
+}
+
+func (p *Parser) ThrowError(msg string) {
+	panic(fmt.Sprintf("Syntax error: %s %d:%d", msg, p.pos.Line, p.pos.Column))
 }

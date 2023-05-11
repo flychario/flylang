@@ -12,10 +12,13 @@ import (
 )
 
 func main() {
-	// get file name from args
 	fileName := os.Args[1]
 
-	// open file
+	runRes := run(fileName)
+	fmt.Println(runRes)
+}
+
+func run(fileName string) string {
 	file, err := os.Open(fileName)
 	if err != nil {
 		panic(err)
@@ -28,22 +31,21 @@ func main() {
 		panic(err)
 	}
 
-	//var s scanner.Scanner
-	//s.Init(content)
-	//for {
-	//	tok, lit := s.Scan()
-	//	if tok == token.EOF {
-	//		break
-	//	}
-	//	println(tok.String(), lit)
-	//}
-
 	var p parser.Parser
 	p.Init(fileName, content)
-	program := p.ParseProgram()
-	//fmt.Printf("%#v\n\n", program)
+	execRes := execWithErrorHandling(p)
+
+	return fmt.Sprintf("\n%v", execRes)
+}
+
+func execWithErrorHandling(parser parser.Parser) ast.Element {
+	defer func() {
+		if r := recover(); r != nil { // Check if we get element from panic, otherwise it is error message
+			fmt.Printf("%v", r)
+		}
+	}()
+	program := parser.ParseProgram()
 
 	c := ast.GetGlobalContext()
-	execRes := program.Eval(c)
-	fmt.Printf("\n%v", execRes)
+	return program.Eval(c)
 }

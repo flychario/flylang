@@ -1,0 +1,15 @@
+(setq add
+    (lambda (p)
+        (cond (greatereq p 0)
+            plus
+            minus)))
+
+(setq mult
+    (lambda (p)
+        (cond (greatereq p 0)
+            times
+            divide)))
+
+((mult -1)
+    ((add +1) 1 2)
+    ((add -1) 1 2))

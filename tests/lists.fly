@@ -1,0 +1,17 @@
+(func isEmpty (xs)
+    (isnull (head xs)))
+
+(func take (n xs)
+    (cond (not (islist xs))
+        (quote ())
+        (cond (isEmpty xs)
+            (quote ())
+            (cond (lesseq n 0)
+                '()
+                (cons
+                    (head xs)
+                    (take
+                        (minus n 1)
+                        (tail xs)))))))
+
+(take 1 '(1 2 3))

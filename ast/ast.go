@@ -1,5 +1,7 @@
 package ast
 
+import "fmt"
+
 type Element interface {
 	ElementType() ElementType
 	Eval(*Context) Element
@@ -167,3 +169,7 @@ func (b Break) GetElements() []Element  { return []Element{} }
 //func IsKeyword(e ElementType) bool {
 //	return e >= keywords && e <= endkeywords
 //}
+
+func CreateEvaluateError(msg string) {
+	panic(fmt.Sprintf("Error occured during execution: %s", msg))
+}
