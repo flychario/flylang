@@ -3,9 +3,6 @@ package main
 import (
 	"fmt"
 	"github.com/flychario/flylang/ast"
-
-	//"github.com/flychario/flylang/scanner"
-	//"github.com/flychario/flylang/token"
 	"github.com/flychario/flylang/parser"
 	"io"
 	"os"

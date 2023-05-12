@@ -1,37 +1,5 @@
 package token
 
-/*
-digit         [0-9]
-letter        [a-zA-Z]
-boolean       "true"|"false"
-integer       {digit}+
-real          {integer} . {integer}
-identifier    {letter}({letter}|{digit})*
-literal       {boolean} | {integer} | {real}
-atom          {identifier}
-element       {literal} | {atom} | {element}
-list          ( {element} {element}* )
-program       {element} {element}*
-
-%%
-"("   { printf("LPAREN "); }
-")"   { printf("RPAREN "); }
-"quote" { printf("SHORT_QUOTE "); }
-"'("  { printf("SHORT_QUOTE "); }
-"setq" { printf("SETQ "); }
-"func" { printf("FUNC "); }
-"lambda" { printf("LAMBDA "); }
-"prog" { printf("PROG "); }
-"cond" { printf("COND "); }
-"while" { printf("WHILE "); }
-"return" { printf("RETURN "); }
-"break" { printf("BREAK "); }
-{identifier} { printf("IDENTIFIER "); }
-{literal} { printf("LITERAL "); }
-"\n" { printf("\n"); }
-%%
-*/
-
 type Token int
 
 const (

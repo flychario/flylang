@@ -165,11 +165,6 @@ func (w While) GetElements() []Element  { return []Element{w.Element1, w.Element
 func (r Return) GetElements() []Element { return []Element{r.Element} }
 func (b Break) GetElements() []Element  { return []Element{} }
 
-//
-//func IsKeyword(e ElementType) bool {
-//	return e >= keywords && e <= endkeywords
-//}
-
 func CreateEvaluateError(msg string) {
 	panic(fmt.Sprintf("Error occured during execution: %s", msg))
 }
